@@ -3,6 +3,7 @@ package rest;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
@@ -41,12 +42,16 @@ public class WebScraperResource {
 
     @Path("parallel")
     @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String getTagsParallel() {
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getTagsParallel() throws ExecutionException, InterruptedException {
 
-        // TODO:
+        LocalTime begin = LocalTime.now();
+        List<TagCounter> dataFetched = Tester.runParallel();
+        LocalTime end = LocalTime.now();
 
-        return "Make me return results, fetched by a parallel strategy";
+        long endTime = ChronoUnit.NANOS.between(begin, end);
+
+        return TagDTO.getTagsAsJson("Parallel fetching", dataFetched, endTime);
     }
 
 }

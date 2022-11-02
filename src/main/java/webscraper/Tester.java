@@ -2,6 +2,7 @@ package webscraper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
 
 public class Tester {
 
@@ -20,13 +21,41 @@ public class Tester {
         return urls;
     }
 
-    public static List<TagCounter> runParallel()  {
+    public static TagCounter getTagCounter(TagCounter tc) {
+        tc.doWork();
+        return tc;
+    }
+
+    public static List<TagCounter> runParallel() throws ExecutionException, InterruptedException {
 
         List<TagCounter> urls = new ArrayList<>();
 
         // TODO:
+        urls.add(new TagCounter("https://www.fck.dk"));
+        urls.add(new TagCounter("https://www.google.com"));
+        urls.add(new TagCounter("https://politiken.dk"));
+        urls.add(new TagCounter("https://cphbusiness.dk"));
 
-        return urls;
+//        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        ExecutorService executorService = Executors.newCachedThreadPool();
+
+        List<Future<TagCounter>> list = new ArrayList<>();
+
+        for (TagCounter tc : urls) {
+            Future<TagCounter> future = executorService.submit(() -> {
+                tc.doWork();
+                return tc;
+            });
+
+            list.add(future);
+        }
+
+        List<TagCounter> result = new ArrayList<>();
+        for (Future<TagCounter> future : list) {
+            result.add(future.get());
+        }
+
+        return result;
     }
 
     public static void main(String[] args) throws Exception {
@@ -47,3 +76,14 @@ public class Tester {
 
     }
 }
+
+//        for(TagCounter tc : urls) {
+//            Future<TagCounter> future = executorService.submit(new Callable<TagCounter>() {
+//                @Override
+//                public TagCounter call() throws Exception {
+//                    tc.doWork();
+//                    return tc;
+//                }
+//            });
+//            list.add(future);
+//        }

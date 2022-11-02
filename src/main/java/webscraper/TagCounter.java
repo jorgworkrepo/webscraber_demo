@@ -19,11 +19,14 @@ public class TagCounter {
   Connect to the URL and count the number of h1, h2, div and body Tags
   */
   public void doWork() {
+
     if(isCalled){
       return; //Tag values already set
     }
+
     isCalled= true;
     Document doc;
+
     try {
 
       doc = Jsoup.connect(url).get();
